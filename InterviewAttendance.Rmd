@@ -13,8 +13,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 The data pertains to the recruitment industry in India for the years 2014-2016 and deals with candidate interview attendance for various clients. When candidates don't appear for interviews, valuable time and resources are lost. If HR is able to predict which canidates may not appear, they could save money.
 
-
-
 #importing libraries and reading data
 ```{r}
 library(dummies)
@@ -63,6 +61,11 @@ interviews <- interviews[1:1232, ]
 #industry
 ```{r}
 levels(interviews$Industry)
+
+levels(interviews$Industry) <- c("BFSI", "Electronics", "IT", "IT", "IT", "Pharmaceuticals", "Telecom")
+
+table(interviews$Industry)
+
 ```
 It looks like there are three factors with IT in it. Lets combine these factors to one.
 
@@ -83,6 +86,9 @@ barplot(table(interviews$Industry))
 #Location
 ```{r}
 levels(interviews$Location)
+
+levels(interviews$Location) <- c("Cochin","Bangalore","Chennai", "Chennai", "Chennai", "Chennai", "Delhi","Gurgaon","Gurgaonr","Hyderabad", "Noida")
+
 ```
 It looks like Chennai is spelt differently for four different factors, lets combine these. Also, Gurgaon is split with an extra r. We can fix this by converting all locations to lower
 
