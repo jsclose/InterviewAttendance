@@ -57,6 +57,13 @@ tail(interviews)
 interviews <- interviews[1:1232, ]
 ```
 
+#ID
+For Classifation, we should drop Candidate ID since it is unique for each row.
+```{r}
+interviews <- interviews[, -8]
+```
+
+
 
 #industry
 ```{r}
@@ -74,7 +81,7 @@ It looks like there are three factors with IT in it. Lets combine these factors 
 interviews[which(interviews$Location=='gurgaonr'),]$Location <- 'gurgaon'
 
 
-interviews[which(interviews$Industry =="IT Products and Services"), ]$Industry <- 'IT'
+#interviews[which(interviews$Industry =="IT Products and Services"), ]$Industry <- 'IT'
 
 #interviews$Industry[interviews$Industry == "IT Products and Services"] <- "IT"
 #interviews$Industry[interviews$Industry == "IT Services"] <- "IT"
@@ -193,6 +200,14 @@ Lets convert 10:30 am and 11:00 am to Yes
 table(interviews$Client)
 ```
 It looks like we can combine  Hewitt, Aon Hewitt and Aon Hewitt Gurgoan. Also Charted Bank?
+
+
+###Marital Status
+```{r}
+barplot(table(interviews$Marital_Status))
+```
+
+
 
 Lets explore our predictor variable, observed attendance:
 Again, we find this is dirty, so lets convert to lowercase first and trim.
