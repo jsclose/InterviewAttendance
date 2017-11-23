@@ -64,8 +64,22 @@ interviews <- interviews[, -8]
 ```
 
 
+#Predictor Variable Attendance
+Lets explore our predictor variable, observed attendance:
+Again, we find this is dirty, so lets convert to lowercase first and trim.
 
-#industry
+
+```{r}
+interviews$Attendance <- trimws(interviews$Attendance)
+interviews$Attendance <- tolower(interviews$Attendance)
+interviews$Attendance <- as.factor(interviews$Attendance)
+
+round(prop.table(table(interviews$Attendance)) * 100, 1)
+
+```
+We find about a 1/3 to 2/3 split of people that have attended.
+
+#Industry
 ```{r}
 levels(interviews$Industry)
 
@@ -76,19 +90,26 @@ table(interviews$Industry)
 ```
 It looks like there are three factors with IT in it. Lets combine these factors to one.
 
-***needs word
 ```{r}
-interviews[which(interviews$Location=='gurgaonr'),]$Location <- 'gurgaon'
-
-
-#interviews[which(interviews$Industry =="IT Products and Services"), ]$Industry <- 'IT'
-
-#interviews$Industry[interviews$Industry == "IT Products and Services"] <- "IT"
-#interviews$Industry[interviews$Industry == "IT Services"] <- "IT"
+levels(interviews$Industry)[levels(interviews$Industry) == "IT Products and Services"] <- "IT"
+levels(interviews$Industry)[levels(interviews$Industry) == "IT Services"] <- "IT"
 levels(interviews$Industry)
 
 barplot(table(interviews$Industry))
 ```
+```{r}
+attendenceByIndustry <- interviews %>%
+    group_by(Industry, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByIndustry, aes(x=Industry, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
+```
+
+
 
 #Location
 ```{r}
@@ -101,12 +122,8 @@ It looks like Chennai is spelt differently for four different factors, lets comb
 
 ```{r}
 interviews$Location <- tolower(interviews$Location)
-
-```
-```{r}
+levels(interviews$Location)[levels(interviews$Location) == "gurgaonr"] <- "gurgaon"
 interviews$Location <- trimws(interviews$Location)
-
-interviews[which(interviews$Location=='gurgaonr'),]$Location <- 'gurgaon'
 table(interviews$Location)
 ```
 
@@ -120,6 +137,20 @@ levels(interviews$Position)
 ```{r}
 barplot(table(interviews$Position))
 ```
+```{r}
+attendenceByPosition <- interviews %>%
+    group_by(Position, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByPosition, aes(x=Position, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
+```
+
+
+
 
 #Gender
 ```{r}
@@ -127,22 +158,79 @@ barplot(table(interviews$Gender))
 ```
 We see that the data is much more male dominated.
 
-#
 ```{r}
-par(mfrow=c(2,2))
+par(mfrow=c(3,3))
+interviews$Hope <- trimws(interviews$Hope)
+interviews$Hope <- tolower(interviews$Hope)
+interviews$Hope <- as.factor(interviews$Hope)
+levels(interviews$Hope)[levels(interviews$Hope) == "na"] <- "unsure"
+levels(interviews$Hope)[levels(interviews$Hope) == "cant say"] <- "unsure"
+levels(interviews$Hope)[levels(interviews$Hope) == "not sure"] <- "unsure"
 barplot(table(interviews$Hope))
 title("Hope Distribution")
+
+
+interviews$Permission <- trimws(interviews$Permission)
+interviews$Permission <- tolower(interviews$Permission)
+interviews$Permission <- as.factor(interviews$Permission)
+levels(interviews$Permission)[levels(interviews$Permission) == "not yet"] <- "no"
+levels(interviews$Permission)[levels(interviews$Permission) == "na"] <- "no"
+levels(interviews$Permission)[levels(interviews$Permission) == "yet to confirm"] <- "no"
 barplot(table(interviews$Permission))
 title("Permission Distribution")
+
+interviews$Alt_Number <- trimws(interviews$Alt_Number)
+interviews$Alt_Number <- tolower(interviews$Alt_Number)
+interviews$Alt_Number <- as.factor(interviews$Alt_Number)
+levels(interviews$Alt_Number)[levels(interviews$Alt_Number) == "na"] <- "no"
+levels(interviews$Alt_Number)[levels(interviews$Alt_Number) == "no i have only thi number"] <- "no"
 barplot(table(interviews$Alt_Number),las=2)
-title("Alt number Distribution")
+title("Alt Number Distribution")
+
+
+
+interviews$Resume_Printout <- trimws(interviews$Resume_Printout)
+interviews$Resume_Printout <- tolower(interviews$Resume_Printout)
+interviews$Resume_Printout <- as.factor(interviews$Resume_Printout)
+levels(interviews$Resume_Printout)[levels(interviews$Resume_Printout) == "no- will take it soon"] <- "yes"
+levels(interviews$Resume_Printout)[levels(interviews$Resume_Printout) == "not yet"] <- "no"
+levels(interviews$Resume_Printout)[levels(interviews$Resume_Printout) == "na"] <- "no"
+
 barplot(table(interviews$Resume_Printout),las=2)
-title("Resume Distribution")
+title("Resume_Printout Distribution")
+
+interviews$Clarify_Venue <- trimws(interviews$Clarify_Venue)
+interviews$Clarify_Venue <- tolower(interviews$Clarify_Venue)
+interviews$Clarify_Venue <- as.factor(interviews$Clarify_Venue)
+levels(interviews$Clarify_Venue)[levels(interviews$Clarify_Venue) == "na"] <- "no"
+levels(interviews$Clarify_Venue)[levels(interviews$Clarify_Venue) == "no- i need to check"] <- "no"
 barplot(table(interviews$Clarify_Venue),las=2)
 title("Clarify_Venue Distribution")
 
+
+interviews$`3_hour_call` <- trimws(interviews$`3_hour_call`)
+interviews$`3_hour_call` <- tolower(interviews$`3_hour_call`)
+interviews$`3_hour_call` <- as.factor(interviews$`3_hour_call`)
+levels(interviews$`3_hour_call`)[levels(interviews$`3_hour_call`) == "na"] <- "no"
+levels(interviews$`3_hour_call`)[levels(interviews$`3_hour_call`) == "no dont"] <- "no"
+barplot(table(interviews$`3_hour_call`))
+title("3 hour call Distribution")
+
+
+interviews$Share_Letter <- trimws(interviews$Share_Letter)
+interviews$Share_Letter <- tolower(interviews$Share_Letter)
+interviews$Share_Letter <- as.factor(interviews$Share_Letter)
+levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "havent checked"] <- "no"
+levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "need to check"] <- "no"
+levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "not sure"] <- "no"
+levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "yet to check"] <- "no"
+levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "not yet"] <- "no"
+levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "na"] <- "no"
+barplot(table(interviews$Share_Letter))
+title("Share Letter Distribution")
+
+
 ```
-We find that these variables have many similar factors that should be combined.
 
 
 
@@ -169,29 +257,59 @@ Can we come up with a distance to job variable?
 There are three different types:
  Walkin drives, Scheduled, and scheduled walkin
 ```{r}
-interviews$Interview_Type <- trimws(interviews$Interview_Type)
-interviews$Interview_Type <- tolower(interviews$Interview_Type)
-(table((interviews$Interview_Type)))
+table(interviews$Interview_Type)
 ```
 It appears the scheduled walkin is described in three ways. Lets combine these.
 ```{r}
-
+interviews$Interview_Type <- trimws(interviews$Interview_Type)
+interviews$Interview_Type <- tolower(interviews$Interview_Type)
+interviews$Interview_Type <- as.factor(interviews$Interview_Type)
+levels(interviews$Interview_Type)[levels(interviews$Interview_Type) == "sceduled walkin"] <- "scheduled walk in"
+levels(interviews$Interview_Type)[levels(interviews$Interview_Type) == "scheduled walkin"] <- "scheduled walk in"
+barplot(table((interviews$Interview_Type)))
 ```
+
+```{r}
+attendenceByType <- interviews %>%
+    group_by(Interview_Type, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByType, aes(x=Interview_Type, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
+```
+
 
 
 #Expected
 Lets clean up expected
 
 ```{r}
-interviews$Expected <- trimws(interviews$Expected)
-interviews$Expected <- tolower(interviews$Expected)
 table(interviews$Expected)
 ```
 Lets convert 10:30 am and 11:00 am to Yes
-
-**need to do.
 ```{r}
+interviews$Expected <- trimws(interviews$Expected)
+interviews$Expected <- tolower(interviews$Expected)
+interviews$Expected <- as.factor(interviews$Expected)
+levels(interviews$Expected)[levels(interviews$Expected) == "10.30 am"] <- "yes"
+levels(interviews$Expected)[levels(interviews$Expected) == "11:00 am"] <- "yes"
+levels(interviews$Expected)[levels(interviews$Expected) == "NA"] <- "no"
 
+barplot(table((interviews$Expected)))
+```
+```{r}
+attendenceByExpected <- interviews %>%
+    group_by(Expected, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByExpected, aes(x=Expected, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
 ```
 
 
@@ -201,25 +319,100 @@ table(interviews$Client)
 ```
 It looks like we can combine  Hewitt, Aon Hewitt and Aon Hewitt Gurgoan. Also Charted Bank?
 
+```{r}
+levels(interviews$Client)[levels(interviews$Client) == "Hewitt"] <- "Aon Hewitt"
+levels(interviews$Client)[levels(interviews$Client) == "Aon hewitt Gurgaon"] <- "Aon Hewitt"
+levels(interviews$Client)[levels(interviews$Client) == "Standard Chartered Bank Chennai"] <- "Standard Chartered Bank"
+```
+```{r}
+attendenceByClient <- interviews %>%
+    group_by(Client, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByClient, aes(x=Client, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
+```
+
+
 
 ###Marital Status
 ```{r}
 barplot(table(interviews$Marital_Status))
+
+
 ```
-
-
-
-Lets explore our predictor variable, observed attendance:
-Again, we find this is dirty, so lets convert to lowercase first and trim.
-
-
 ```{r}
-interviews$Attendance <- trimws(interviews$Attendance)
-interviews$Attendance <- tolower(interviews$Attendance)
-round(prop.table(table(interviews$Attendance)) * 100, 1)
+attendenceByMarriage <- interviews %>%
+    group_by(Marital_Status, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByMarriage, aes(x=Marital_Status, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
+```
+
+The date variable appears to be in many different formats.
+```{r}
+table(interviews$Date)
+```
+
+#Skillsets
+The skillset factor appears to have many different factors with similar names and also some factors that don't appear to be skillsets.
+```{r}
+table(interviews$Skillset)
+```
+
+
+
+
+
+#Decision Trees
+```{r}
+#create subset without skill or date
+i <- interviews[-1]
+i <- i[-5]
+i[is.na(i)] <- "no"
+colSums(is.na.data.frame(i))
+
+
+# create a random sample for training and test data
+# use set.seed to use the same random number sequence as the tutorial
+set.seed(12345)
+i_rand <- i[order(runif(1232)), ]
+
+i_train <- i[1:700, ]
+i_test <- i[701:1232, ]
+
+#Compare the two for similar proportiins, looks good.
+prop.table(table(i_train$Attendance))
+prop.table(table(i_test$Attendance))
+
+#create mode
+interview_model <- C5.0(i_train[-19], i_train$Attendance)
+
+
+interview_model
+
+# display detailed information about the tree
+summary(interview_model)
+
+## Step 4: Evaluating model performance ----
+# create a factor vector of predictions on test data
+#interview_pred <- predict(interview_model, i_test)
+
+# cross tabulation of predicted versus actual classes
+#library(gmodels)
+#CrossTable(i_test$Attendance, interview_pred,
+#           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+#           dnn = c('actual Attendance', 'predicted Attendance'))
 
 ```
-We find about a 1/3 to 2/3 split of people that have attended.
+
 
 
 
