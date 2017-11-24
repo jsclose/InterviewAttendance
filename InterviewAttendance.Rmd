@@ -227,7 +227,7 @@ levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "yet to check
 levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "not yet"] <- "no"
 levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "na"] <- "no"
 barplot(table(interviews$Share_Letter))
-title("Share Letter Distribution")
+title(main = "Share Letter Distribution")
 
 
 ```
@@ -238,22 +238,80 @@ title("Share Letter Distribution")
 Refers to the candidate's hometown.
 ```{r}
 table(interviews$Native_Loc)
+
+
+# - Cochin- and Delhi/NCR stops the maps api from working, how to remove?
+
+levels(interviews$Native_Loc)[levels(interviews$Native_Loc) == "- Cochin-"] <- "Cochin"
+levels(interviews$Native_Loc)[levels(interviews$Native_Loc) == "Delhi /NCR"] <- "Delhi"
+
+interviews$Native_Loc[interviews$Native_Loc == "Delhi /NCR"] <- "NCR"
+interviews$Native_Loc[interviews$Native_Loc == "- Cochin-  "] <- "Cochin"
+
+interviews <- interviews[!(interviews$Native_Loc== "Delhi /NCR"),]
+interviews <- interviews[!(interviews$Native_Loc== "- Cochin-  "),]
+
+
 ```
 The majority of locations are <25, with the major candidate locations coming from Chennai, Hyderbad, and Bangalore.
 
 ##Job Location
 
 ```{r}
+
 table(interviews$Job_Location)
+interviews$Job_Location <- trimws(interviews$Job_Location)
+interviews$Job_Location <- tolower(interviews$Job_Location)
+levels(interviews$Job_Location) <- c("Cochin","Bangalore","Chennai", "Gurgaonr","Hosur", "Noida", "Visakapatinam")
 
 ```
 
 #Distance function
-Can we come up with a distance to job variable?
+
+Work-in-progress need to now create a new column in the original table with the distances from this lookup table. 
+
+```{r}
+library("gmapsdistance")
+
+distances_lookup_table <- read.csv("distances.csv")
+
+#Only want to make the Google Maps API calls once so this was run then written to csv. 
+if (FALSE){
+  set.api.key("")
+  
+  distinct = interviews %>% distinct(Native_Loc) 
+  cities = interviews %>% distinct(Job_Location) 
+  
+  cities <- cities[,colSums(is.na(cities))<nrow(cities)]
+  
+  cities <- cities[!is.na(cities)]
+  distinct <- distinct[is.na(cities)]
+  distinct <- distinct[-1]
+  
+  distinct$"Hosur" <- 0
+  distinct$"Bangalore" <- 0
+  distinct$"Chennai" <- 0
+  distinct$"Guraonr" <- 0
+  distinct$"Visakapatinam" <- 0
+  distinct$"Cochib" <- 0
+  distinct$"Noida" <- 0
+               
+  for(j in 1:ncol(distinct) -1) {        
+    for(i in 1:nrow(distinct)) {
+        results <- gmapsdistance(origin = as.character(distinct[i,1]), 
+                            destination =as.character(cities[j]),
+                            mode = "driving")
+        distinct[i,j+1] = results$Distance
+    }
+  }
+  
+  write.csv(distinct, 'distances.csv')
+}
+```
 
 
 
-#Interview Type
+/#Interview Type
 There are three different types:
  Walkin drives, Scheduled, and scheduled walkin
 ```{r}
