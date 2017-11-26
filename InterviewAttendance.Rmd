@@ -443,15 +443,15 @@ colSums(is.na.data.frame(i))
 set.seed(12345)
 i_rand <- i[order(runif(1232)), ]
 
-i_train <- i[1:700, ]
-i_test <- i[701:1232, ]
+i_train <- i[1:1000, ]
+i_test <- i[1001:1232, ]
 
 #Compare the two for similar proportiins, looks good.
 prop.table(table(i_train$Attendance))
 prop.table(table(i_test$Attendance))
 
 #create mode
-interview_model <- C5.0(i_train[-19], i_train$Attendance)
+interview_model <- C5.0(i_train[-19], i_train$Attendance, trials = 50)
 
 
 interview_model
@@ -459,18 +459,65 @@ interview_model
 # display detailed information about the tree
 summary(interview_model)
 
-## Step 4: Evaluating model performance ----
+## Evaluating model performance ----
 # create a factor vector of predictions on test data
-#interview_pred <- predict(interview_model, i_test)
+interview_pred <- predict(interview_model, i_test)
 
 # cross tabulation of predicted versus actual classes
 #library(gmodels)
-#CrossTable(i_test$Attendance, interview_pred,
-#           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
-#           dnn = c('actual Attendance', 'predicted Attendance'))
+CrossTable(i_test$Attendance, interview_pred,
+           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+           dnn = c('actual Attendance', 'predicted Attendance'))
 
 ```
+To potentially improve the model, we can include an error matrix. 
 
+```{r}
+## Making some mistakes more costly than others
+# create a cost matrix
+error_cost <- matrix(c(0, 6, 1, 0), nrow = 2)
+error_cost
+
+# apply the cost matrix to the tree
+interview_cost <- C5.0(i_train[-19], i_train$Attendance,
+                          costs = error_cost, trials = 40)
+interview_cost_pred <- predict(interview_cost, i_test)
+
+CrossTable(i_test$Attendance, interview_cost_pred,
+           prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
+           dnn = c('actual attendance', 'predicted attendance'))
+```
+
+
+
+
+
+#SVM
+```{r}
+# Step 2: Training a model on the data
+# begin by training a simple linear SVM
+library(kernlab)
+attendance_classifier <- ksvm(Attendance ~ ., data = i_train,
+                          kernel = "vanilladot")
+
+# look at basic information about the model
+attendance_classifier
+
+## Step 3: Evaluating model performance 
+# predictions on testing dataset
+attendance_predictions <- predict(attendance_classifier, i_test)
+
+head(attendance_predictions)
+
+table(attendance_predictions, i_test$Attendance)
+```
+
+
+
+KNN
+```{r}
+i_num <-model.matrix(~ ., data = i)
+```
 
 
 
