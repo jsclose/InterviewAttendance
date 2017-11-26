@@ -276,8 +276,9 @@ library("gmapsdistance")
 distances_lookup_table <- read.csv("distances.csv")
 
 #Only want to make the Google Maps API calls once so this was run then written to csv. 
+#Lets loop through and make an API call for each city to find distances
 if (FALSE){
-  set.api.key("")
+  set.api.key("") #Key hidden 
   
   distinct = interviews %>% distinct(Native_Loc) 
   cities = interviews %>% distinct(Job_Location) 
@@ -307,11 +308,37 @@ if (FALSE){
   
   write.csv(distinct, 'distances.csv')
 }
+
+distances_lookup_table <- distances_lookup_table[-6,]
+names(distances_lookup_table)[5] <- "Gurgaon"
+interviews$Location[interviews$Location == "Gurgaonr"] <- "Gurgaon"
+  
+# Function that returns the distance in the lookup table  
+lookup <- function(distances_lookup_table, start, end) {
+  dist <- distances_lookup_table[tolower(distances_lookup_table$Native_Loc) == as.character(start), as.character(end)]
+  
+  if (is.null(dist)){
+    return (-1)
+  } else {
+    return(dist)
+  }
+ 
+}
+
+# Lets set the distance column in the interveiw section
+for(i in 1:nrow(interviews)){  
+  val <-lookup(distances_lookup_table, tolower(interviews$Location[i]), sapply((as.character(interviews$Venue[i])),function(x) paste(toupper(substr(x,1,1)),substr(x,2,nchar(x)),sep="")))
+  
+  interviews$Distance[i] <- val
+}
+ 
+
+
 ```
 
 
 
-/#Interview Type
+#Interview Type
 There are three different types:
  Walkin drives, Scheduled, and scheduled walkin
 ```{r}
