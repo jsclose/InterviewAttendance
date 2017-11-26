@@ -312,12 +312,14 @@ if (FALSE){
 distances_lookup_table <- distances_lookup_table[-6,]
 names(distances_lookup_table)[5] <- "Gurgaon"
 interviews$Location[interviews$Location == "Gurgaonr"] <- "Gurgaon"
+interviews$Location[469] <- "Gurgaon"
+
   
 # Function that returns the distance in the lookup table  
 lookup <- function(distances_lookup_table, start, end) {
   dist <- distances_lookup_table[tolower(distances_lookup_table$Native_Loc) == as.character(start), as.character(end)]
-  
-  if (is.null(dist)){
+
+    if (is.null(dist)){
     return (-1)
   } else {
     return(dist)
