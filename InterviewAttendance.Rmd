@@ -438,14 +438,41 @@ plot<-ggplot(data=attendenceByMarriage, aes(x=Marital_Status, y=count, fill = (A
 plot 
 ```
 
-The date variable appears to be in many different formats.
-```{r}
+The date variable appears to be in many different formats. Lets use the package lubridate to see if we can parse these effectively.
+```{r, include = FALSE}
 table(interviews$Date)
+interviews$Date <- as.character(interviews$Date)
+interviews$Date <- sapply(strsplit(as.character(interviews$Date),'&'), "[", 1)
+
+library(lubridate)
+interviews$Date <- parse_date_time(interviews$Date, ("dmy"))
+interviews$Date <- as.factor(interviews$Date)
+table(interviews$Date)
+
 ```
+#Day of Week
+Lets create a day of week factor.
+```{r, include = FALSE}
+interviews$DayOfWeek <- wday(as.Date(interviews$Date), label = TRUE)
+table(interviews$DayOfWeek)
+```
+```{r, echo= FALSE}
+attendenceByDOW <- interviews %>%
+    group_by(DayOfWeek, Attendance) %>%
+    summarise(count = n())
+
+
+#% of rides by customer type
+plot<-ggplot(data=attendenceByDOW, aes(x=DayOfWeek, y=count, fill = (Attendance)))+
+  geom_bar(stat="identity" , position = "dodge")
+plot 
+```
+It is interesting to note that there are interviews on Saturday and Sunday. Also, there tend to be more interviews later in the week. Lastly, Friday has the worst attendance (makes sense).
+
 
 #Skillsets
 The skillset factor appears to have many different factors with similar names and also some factors that don't appear to be skillsets.
-```{r}
+```{r, include = FALSE}
 table(interviews$Skillset)
 ```
 
@@ -454,10 +481,10 @@ table(interviews$Skillset)
 
 
 #Decision Trees
-```{r}
-#create subset without skill or date
-i <- interviews[-1]
-i <- i[-5]
+```{r, echo= FALSE}
+#create subset without skill
+#i <- interviews[-1]
+i <- interviews[-6]
 i[is.na(i)] <- "no"
 colSums(is.na.data.frame(i))
 
@@ -475,7 +502,7 @@ prop.table(table(i_train$Attendance))
 prop.table(table(i_test$Attendance))
 
 #create mode
-interview_model <- C5.0(i_train[-19], i_train$Attendance, trials = 50)
+interview_model <- C5.0(i_train[-20], i_train$Attendance, trials = 15)
 
 
 interview_model
@@ -503,7 +530,7 @@ error_cost <- matrix(c(0, 6, 1, 0), nrow = 2)
 error_cost
 
 # apply the cost matrix to the tree
-interview_cost <- C5.0(i_train[-19], i_train$Attendance,
+interview_cost <- C5.0(i_train[-20], i_train$Attendance,
                           costs = error_cost, trials = 40)
 interview_cost_pred <- predict(interview_cost, i_test)
 
@@ -517,10 +544,12 @@ CrossTable(i_test$Attendance, interview_cost_pred,
 
 
 #SVM
-#```{r}
-# Step 2: Training a model on the data
+```{r}
+#  Training a model on the data
 # begin by training a simple linear SVM
 library(kernlab)
+
+
 attendance_classifier <- ksvm(Attendance ~ ., data = i_train,
                           kernel = "vanilladot")
 
@@ -529,18 +558,37 @@ attendance_classifier
 
 ## Step 3: Evaluating model performance 
 # predictions on testing dataset
-attendance_predictions <- predict(attendance_classifier, i_test)
+#attendance_predictions <- predict(attendance_classifier, i_test)
 
-head(attendance_predictions)
+#head(attendance_predictions)
 
-table(attendance_predictions, i_test$Attendance)
+#table(attendance_predictions, i_test$Attendance)
 ```
 
 
 
 KNN
-#```{r}
-i_num <-model.matrix(~ ., data = i)
+```{r, echo =FALSE}
+#drop date
+i_dummy <- i[-1]
+#drop outpu
+i_dummy <- i_dummy[-19]
+
+i_dummy <-model.matrix(~ ., data = i_dummy)
+i_dummy <- as.data.frame(scale(i_dummy))
+i_dummy <- i_dummy[-1]
+i_train <-i_dummy[0:(.80*nrow(i_dummy)),]
+i_test <- i_dummy[(.80*nrow(i_dummy)):nrow(i_dummy), ]
+
+i_train_labels <- i[0:(.80*nrow(i_dummy)), 20]
+i_test_labels <- i[(.80*nrow(i_dummy)):nrow(i_dummy), 20]
+
+library(gmodels)
+library(class)
+
+att_pred <- knn(train = i_train, test = i_test, cl = i_train_labels, k = 35)
+
+CrossTable(x= i_test_labels, y = att_pred, prop.chisq = FALSE)
 ```
 
 
