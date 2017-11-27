@@ -11,10 +11,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Context
 
-The data pertains to the recruitment industry in India for the years 2014-2016 and deals with candidate interview attendance for various clients. When candidates don't appear for interviews, valuable time and resources are lost. If HR is able to predict which canidates may not appear, they could save money.
+The data pertains to the recruitment industry in India for the years 2014-2016 and deals with candidate interview attendance for various clients. When candidates don't appear for interviews, valuable time and resources are lost. 
 
-#importing libraries and reading data
-```{r}
+##Business Value
+
+If we are able to predict which canidates may not appear, the company and hr could save money and time. Also, understanding which factors may cause a person to not appear could be valuable when trying to improve attendenance rates. 
+
+
+#Import Libraries and Read Data
+```{r, echo=TRUE}
 library(dummies)
 library(class)
 library(gmodels)
@@ -25,7 +30,7 @@ interviews <- read.csv("Interview.csv")
 ```
 
 
-#data cleaning
+#Data Cleaning
 
 It appears the are extra columns read that are completely full of NA's. Lets drop these.
 
@@ -35,7 +40,7 @@ interviews <- interviews[, 1:23]
 ```
 
 
-Lets rename the variables to make them more readable
+Lets rename the variables to make them more readable.
 ```{r}
 names <- c("Date", "Client", "Industry", "Location", "Position", "Skillset", "Interview_Type", "ID", "Gender", "Candidate_Loc", "Job_Location", "Venue", "Native_Loc", "Permission", "Hope", "3_hour_call", "Alt_Number", "Resume_Printout", "Clarify_Venue", "Share_Letter", "Expected", "Attendance", "Marital_Status")
 colnames(interviews) <- names
@@ -44,12 +49,11 @@ colnames(interviews) <- names
 
 Next, lets explore which variables may need to be cleaned.
 
-
 We check the intial structure of the dataset in order to do some data cleaning and exploration
 ```{r}
 str(interviews)
 ```
-From the intial structure, it appears that all of the variables are factor based. Lets explore these factors to make sure that there are no duplicates or NA
+From the intial structure, it appears that all of the variables are factor based. Each variable has a large number of factors aswell. Lets explore these factors to make sure that there are no duplicates, similar values or NA.
 
 It appears that most of the columns have 1 NA. Lets see which if this is the last value?
 ```{r}
@@ -69,7 +73,7 @@ Lets explore our predictor variable, observed attendance:
 Again, we find this is dirty, so lets convert to lowercase first and trim.
 
 
-```{r}
+```{r, echo= TRUE}
 interviews$Attendance <- trimws(interviews$Attendance)
 interviews$Attendance <- tolower(interviews$Attendance)
 interviews$Attendance <- as.factor(interviews$Attendance)
@@ -77,27 +81,24 @@ interviews$Attendance <- as.factor(interviews$Attendance)
 round(prop.table(table(interviews$Attendance)) * 100, 1)
 
 ```
-We find about a 1/3 to 2/3 split of people that have attended.
+We find about a 1/3 to 2/3 split of people that have attended. This will serve as a benchmark for our predictions.
 
 #Industry
-```{r}
+```{r , include=FALSE}
 levels(interviews$Industry)
-
 levels(interviews$Industry) <- c("BFSI", "Electronics", "IT", "IT", "IT", "Pharmaceuticals", "Telecom")
-
 table(interviews$Industry)
 
 ```
-It looks like there are three factors with IT in it. Lets combine these factors to one.
 
-```{r}
+```{r, echo = FALSE}
+#It looks like there are three factors with IT in it. Lets combine these factors to one.
+
 levels(interviews$Industry)[levels(interviews$Industry) == "IT Products and Services"] <- "IT"
 levels(interviews$Industry)[levels(interviews$Industry) == "IT Services"] <- "IT"
 levels(interviews$Industry)
-
-barplot(table(interviews$Industry))
 ```
-```{r}
+```{r , echo= FALSE}
 attendenceByIndustry <- interviews %>%
     group_by(Industry, Attendance) %>%
     summarise(count = n())
@@ -108,36 +109,34 @@ plot<-ggplot(data=attendenceByIndustry, aes(x=Industry, y=count, fill = (Attenda
   geom_bar(stat="identity" , position = "dodge")
 plot 
 ```
-
+When comparing Attendance to Industry type of interview, we find that each group has a relatively similar proportion of attendance. BFSI is the most popular Industry. Lastly, Telecom and Pharmaceuticals have worst rates.
 
 
 #Location
-```{r}
+```{r, include= FALSE}
 levels(interviews$Location)
-
 levels(interviews$Location) <- c("Cochin","Bangalore","Chennai", "Chennai", "Chennai", "Chennai", "Delhi","Gurgaon","Gurgaonr","Hyderabad", "Noida")
-
+#It looks like Chennai is spelt differently for four different factors, lets combine these. Also, Gurgaon is split with an extra r. We can fix this by converting all locations to lower
 ```
-It looks like Chennai is spelt differently for four different factors, lets combine these. Also, Gurgaon is split with an extra r. We can fix this by converting all locations to lower
 
-```{r}
+
+```{r , echo = FALSE}
+
 interviews$Location <- tolower(interviews$Location)
 levels(interviews$Location)[levels(interviews$Location) == "gurgaonr"] <- "gurgaon"
 interviews$Location <- trimws(interviews$Location)
 table(interviews$Location)
 ```
 
+
+
 #Position
-```{r}
+```{r, include=FALSE}
 levels(interviews$Position)
 
 ```
 
-
-```{r}
-barplot(table(interviews$Position))
-```
-```{r}
+```{r, echo=FALSE}
 attendenceByPosition <- interviews %>%
     group_by(Position, Attendance) %>%
     summarise(count = n())
@@ -153,12 +152,12 @@ plot
 
 
 #Gender
-```{r}
+```{r, echo=FALSE}
 barplot(table(interviews$Gender))
 ```
 We see that the data is much more male dominated.
 
-```{r}
+```{r , echo=FALSE}
 par(mfrow=c(3,3))
 interviews$Hope <- trimws(interviews$Hope)
 interviews$Hope <- tolower(interviews$Hope)
@@ -236,7 +235,7 @@ title(main = "Share Letter Distribution")
 
 ## Native Location
 Refers to the candidate's hometown.
-```{r}
+```{r, echo = FALSE}
 table(interviews$Native_Loc)
 
 
@@ -257,7 +256,7 @@ The majority of locations are <25, with the major candidate locations coming fro
 
 ##Job Location
 
-```{r}
+```{r, echo = FALSE}
 
 table(interviews$Job_Location)
 interviews$Job_Location <- trimws(interviews$Job_Location)
@@ -342,12 +341,12 @@ for(i in 1:nrow(interviews)){
 
 #Interview Type
 There are three different types:
- Walkin drives, Scheduled, and scheduled walkin
+Walkin drives, Scheduled, and scheduled walkin
 ```{r}
 table(interviews$Interview_Type)
 ```
 It appears the scheduled walkin is described in three ways. Lets combine these.
-```{r}
+```{r, include = FALSE}
 interviews$Interview_Type <- trimws(interviews$Interview_Type)
 interviews$Interview_Type <- tolower(interviews$Interview_Type)
 interviews$Interview_Type <- as.factor(interviews$Interview_Type)
@@ -356,7 +355,7 @@ levels(interviews$Interview_Type)[levels(interviews$Interview_Type) == "schedule
 barplot(table((interviews$Interview_Type)))
 ```
 
-```{r}
+```{r, echo =FALSE}
 attendenceByType <- interviews %>%
     group_by(Interview_Type, Attendance) %>%
     summarise(count = n())
@@ -377,7 +376,7 @@ Lets clean up expected
 table(interviews$Expected)
 ```
 Lets convert 10:30 am and 11:00 am to Yes
-```{r}
+```{r, include = FALSE}
 interviews$Expected <- trimws(interviews$Expected)
 interviews$Expected <- tolower(interviews$Expected)
 interviews$Expected <- as.factor(interviews$Expected)
@@ -387,7 +386,7 @@ levels(interviews$Expected)[levels(interviews$Expected) == "NA"] <- "no"
 
 barplot(table((interviews$Expected)))
 ```
-```{r}
+```{r, echo = FALSE}
 attendenceByExpected <- interviews %>%
     group_by(Expected, Attendance) %>%
     summarise(count = n())
@@ -406,12 +405,13 @@ table(interviews$Client)
 ```
 It looks like we can combine  Hewitt, Aon Hewitt and Aon Hewitt Gurgoan. Also Charted Bank?
 
-```{r}
+```{r, include = FALSE}
 levels(interviews$Client)[levels(interviews$Client) == "Hewitt"] <- "Aon Hewitt"
 levels(interviews$Client)[levels(interviews$Client) == "Aon hewitt Gurgaon"] <- "Aon Hewitt"
 levels(interviews$Client)[levels(interviews$Client) == "Standard Chartered Bank Chennai"] <- "Standard Chartered Bank"
 ```
-```{r}
+
+```{r, echo = FALSE}
 attendenceByClient <- interviews %>%
     group_by(Client, Attendance) %>%
     summarise(count = n())
@@ -426,12 +426,7 @@ plot
 
 
 ###Marital Status
-```{r}
-barplot(table(interviews$Marital_Status))
-
-
-```
-```{r}
+```{r, echo= FALSE}
 attendenceByMarriage <- interviews %>%
     group_by(Marital_Status, Attendance) %>%
     summarise(count = n())
@@ -522,7 +517,7 @@ CrossTable(i_test$Attendance, interview_cost_pred,
 
 
 #SVM
-```{r}
+#```{r}
 # Step 2: Training a model on the data
 # begin by training a simple linear SVM
 library(kernlab)
@@ -544,7 +539,7 @@ table(attendance_predictions, i_test$Attendance)
 
 
 KNN
-```{r}
+#```{r}
 i_num <-model.matrix(~ ., data = i)
 ```
 
