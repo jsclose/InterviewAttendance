@@ -17,6 +17,8 @@ The data pertains to the recruitment industry in India for the years 2014-2016 a
 
 If we are able to predict which canidates may not appear, the company and hr could save money and time. Also, understanding which factors may cause a person to not appear could be valuable when trying to improve attendenance rates. 
 
+We believe that we can determine with a degree of accuracy who will show or not show for an interview and so the businesses can only book those that will show up.
+
 
 #Import Libraries and Read Data
 ```{r, echo=TRUE}
@@ -109,15 +111,16 @@ plot<-ggplot(data=attendenceByIndustry, aes(x=Industry, y=count, fill = (Attenda
   geom_bar(stat="identity" , position = "dodge")
 plot 
 ```
-When comparing Attendance to Industry type of interview, we find that each group has a relatively similar proportion of attendance. BFSI is the most popular Industry. Lastly, Telecom and Pharmaceuticals have worst rates.
+When comparing Attendance to Industry type of interview, we find that each group has a relatively similar proportion of attendance. BFSI is the most popular Industry. Lastly, Telecom and Pharmaceuticals have worst rates of attendence.
 
 
 #Location
 ```{r, include= FALSE}
 levels(interviews$Location)
 levels(interviews$Location) <- c("Cochin","Bangalore","Chennai", "Chennai", "Chennai", "Chennai", "Delhi","Gurgaon","Gurgaonr","Hyderabad", "Noida")
-#It looks like Chennai is spelt differently for four different factors, lets combine these. Also, Gurgaon is split with an extra r. We can fix this by converting all locations to lower
+
 ```
+It looks like Chennai is spelt differently for four different factors, lets combine these. Also, Gurgaon is split with an extra r. We can fix this by converting all locations to lower
 
 
 ```{r , echo = FALSE}
@@ -125,15 +128,13 @@ levels(interviews$Location) <- c("Cochin","Bangalore","Chennai", "Chennai", "Che
 interviews$Location <- tolower(interviews$Location)
 levels(interviews$Location)[levels(interviews$Location) == "gurgaonr"] <- "gurgaon"
 interviews$Location <- trimws(interviews$Location)
-table(interviews$Location)
 ```
-
+Lets also fix the misspelling of the city Gurgaon.
 
 
 #Position
 ```{r, include=FALSE}
 levels(interviews$Position)
-
 ```
 
 ```{r, echo=FALSE}
@@ -141,20 +142,19 @@ attendenceByPosition <- interviews %>%
     group_by(Position, Attendance) %>%
     summarise(count = n())
 
-
-#% of rides by customer type
 plot<-ggplot(data=attendenceByPosition, aes(x=Position, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
 ```
 
-
+If we look at the attendence by position we see that the worst attendence rates were for Production-Sterile jobs (where no one attended) and Dot Net jobs. In addition most of the attendence data is for Routine jobs. 
 
 
 #Gender
 ```{r, echo=FALSE}
 barplot(table(interviews$Gender))
 ```
+
 We see that the data is much more male dominated.
 
 ```{r , echo=FALSE}
@@ -168,6 +168,11 @@ levels(interviews$Hope)[levels(interviews$Hope) == "not sure"] <- "unsure"
 barplot(table(interviews$Hope))
 title("Hope Distribution")
 
+```
+
+This graph is for "Hope that there will be no unscheduled meetings" and we can see that in a high majority of the time there is a belief there will be no interruptions.
+
+```{r , echo=FALSE}
 
 interviews$Permission <- trimws(interviews$Permission)
 interviews$Permission <- tolower(interviews$Permission)
@@ -177,6 +182,11 @@ levels(interviews$Permission)[levels(interviews$Permission) == "na"] <- "no"
 levels(interviews$Permission)[levels(interviews$Permission) == "yet to confirm"] <- "no"
 barplot(table(interviews$Permission))
 title("Permission Distribution")
+```
+
+This graph is for "Permission to start at the required time" and the graph shows the results as a majority yes. This means that if they get the job they can start right away.
+
+```{r , echo=FALSE}
 
 interviews$Alt_Number <- trimws(interviews$Alt_Number)
 interviews$Alt_Number <- tolower(interviews$Alt_Number)
@@ -185,9 +195,11 @@ levels(interviews$Alt_Number)[levels(interviews$Alt_Number) == "na"] <- "no"
 levels(interviews$Alt_Number)[levels(interviews$Alt_Number) == "no i have only thi number"] <- "no"
 barplot(table(interviews$Alt_Number),las=2)
 title("Alt Number Distribution")
+```
 
+This graph displays if the candidate has given an alternate number to be reached by. A high majority of the interviewees gave an alternate number. 
 
-
+```{r , echo=FALSE}
 interviews$Resume_Printout <- trimws(interviews$Resume_Printout)
 interviews$Resume_Printout <- tolower(interviews$Resume_Printout)
 interviews$Resume_Printout <- as.factor(interviews$Resume_Printout)
@@ -197,7 +209,11 @@ levels(interviews$Resume_Printout)[levels(interviews$Resume_Printout) == "na"] <
 
 barplot(table(interviews$Resume_Printout),las=2)
 title("Resume_Printout Distribution")
+```
 
+This graph shows if the candidate has recently printed out his or her resume. Most of them have. 
+
+```{r , echo=FALSE}
 interviews$Clarify_Venue <- trimws(interviews$Clarify_Venue)
 interviews$Clarify_Venue <- tolower(interviews$Clarify_Venue)
 interviews$Clarify_Venue <- as.factor(interviews$Clarify_Venue)
@@ -205,8 +221,11 @@ levels(interviews$Clarify_Venue)[levels(interviews$Clarify_Venue) == "na"] <- "n
 levels(interviews$Clarify_Venue)[levels(interviews$Clarify_Venue) == "no- i need to check"] <- "no"
 barplot(table(interviews$Clarify_Venue),las=2)
 title("Clarify_Venue Distribution")
+```
 
+This graph shows that most of the candidates did confirm where his or her interview location was before the interview was scheduled.
 
+```{r , echo=FALSE}
 interviews$`3_hour_call` <- trimws(interviews$`3_hour_call`)
 interviews$`3_hour_call` <- tolower(interviews$`3_hour_call`)
 interviews$`3_hour_call` <- as.factor(interviews$`3_hour_call`)
@@ -214,8 +233,11 @@ levels(interviews$`3_hour_call`)[levels(interviews$`3_hour_call`) == "na"] <- "n
 levels(interviews$`3_hour_call`)[levels(interviews$`3_hour_call`) == "no dont"] <- "no"
 barplot(table(interviews$`3_hour_call`))
 title("3 hour call Distribution")
+```
 
+Most of the candidates agreed to a 3 hour "warning call" to alert them that the interview will take place in 3 hours. 
 
+```{r , echo=FALSE}
 interviews$Share_Letter <- trimws(interviews$Share_Letter)
 interviews$Share_Letter <- tolower(interviews$Share_Letter)
 interviews$Share_Letter <- as.factor(interviews$Share_Letter)
@@ -227,9 +249,9 @@ levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "not yet"] <-
 levels(interviews$Share_Letter)[levels(interviews$Share_Letter) == "na"] <- "no"
 barplot(table(interviews$Share_Letter))
 title(main = "Share Letter Distribution")
-
-
 ```
+
+A call letter is given to the candidate and it lets them know the information about the scheduled interview. Most of the candidates did receive the call letter and were in posession of it. 
 
 
 
@@ -239,8 +261,7 @@ Refers to the candidate's hometown.
 table(interviews$Native_Loc)
 
 
-# - Cochin- and Delhi/NCR stops the maps api from working, how to remove?
-
+# - Cochin- and Delhi/NCR stops the maps api from working
 levels(interviews$Native_Loc)[levels(interviews$Native_Loc) == "- Cochin-"] <- "Cochin"
 levels(interviews$Native_Loc)[levels(interviews$Native_Loc) == "Delhi /NCR"] <- "Delhi"
 
@@ -249,9 +270,8 @@ interviews$Native_Loc[interviews$Native_Loc == "- Cochin-  "] <- "Cochin"
 
 interviews <- interviews[!(interviews$Native_Loc== "Delhi /NCR"),]
 interviews <- interviews[!(interviews$Native_Loc== "- Cochin-  "),]
-
-
 ```
+
 The majority of locations are <25, with the major candidate locations coming from Chennai, Hyderbad, and Bangalore.
 
 ##Job Location
@@ -267,15 +287,12 @@ levels(interviews$Job_Location) <- c("Cochin","Bangalore","Chennai", "Gurgaonr",
 
 #Distance function
 
-Work-in-progress need to now create a new column in the original table with the distances from this lookup table. 
-
+Lets see if we can add to this data and add another data point to make our prediction better. We can use the Google Maps API in order to get the distance between where the candidate's location is vs where the interview location is to see if they need to travel to the interview. This could be a good indicator as if a candidate is further away they might not want to go to the interview. 
 ```{r}
 library("gmapsdistance")
 
-distances_lookup_table <- read.csv("distances.csv")
-
 #Only want to make the Google Maps API calls once so this was run then written to csv. 
-#Lets loop through and make an API call for each city to find distances
+#Lets loop through and make an API call for each city to find distances and create a lookup table. 
 if (FALSE){
   set.api.key("") #Key hidden 
   
@@ -308,6 +325,8 @@ if (FALSE){
   write.csv(distinct, 'distances.csv')
 }
 
+# Lets read in the lookup table that we created earlier. Need to do some specific cleaning on it for NAs and Misspellings that are left. 
+distances_lookup_table <- read.csv("distances.csv")
 distances_lookup_table <- distances_lookup_table[-6,]
 names(distances_lookup_table)[5] <- "Gurgaon"
 interviews$Location[interviews$Location == "Gurgaonr"] <- "Gurgaon"
@@ -316,9 +335,16 @@ interviews$Location[469] <- "Gurgaon"
   
 # Function that returns the distance in the lookup table  
 lookup <- function(distances_lookup_table, start, end) {
+
+  # If the start == end, distance is 0
+  if(tolower(as.character(start)) == tolower(as.character(end))){
+    return(0)
+  }
+  
   dist <- distances_lookup_table[tolower(distances_lookup_table$Native_Loc) == as.character(start), as.character(end)]
 
-    if (is.null(dist)){
+  # If the lookup table returns nothing then set it to be -1 otherwise return the distance 
+  if (is.null(dist)){
     return (-1)
   } else {
     return(dist)
@@ -354,20 +380,19 @@ levels(interviews$Interview_Type)[levels(interviews$Interview_Type) == "sceduled
 levels(interviews$Interview_Type)[levels(interviews$Interview_Type) == "scheduled walkin"] <- "scheduled walk in"
 barplot(table((interviews$Interview_Type)))
 ```
-
+Most of the interviews are Scheduled Walk-ins with scheduled and Walk-in following. 
 ```{r, echo =FALSE}
 attendenceByType <- interviews %>%
     group_by(Interview_Type, Attendance) %>%
     summarise(count = n())
 
 
-#% of rides by customer type
 plot<-ggplot(data=attendenceByType, aes(x=Interview_Type, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
 ```
 
-
+This graph shows that just walkins have the lowest rate of attendence compared to scheduled and scheduled walk-in,
 
 #Expected
 Lets clean up expected
@@ -386,17 +411,17 @@ levels(interviews$Expected)[levels(interviews$Expected) == "NA"] <- "no"
 
 barplot(table((interviews$Expected)))
 ```
+We can see that most of the candidates are excepted to show up. There is also a high level of uncertainty. Hopefully we can shed some light on the uncertainty. 
 ```{r, echo = FALSE}
 attendenceByExpected <- interviews %>%
     group_by(Expected, Attendance) %>%
     summarise(count = n())
 
-
-#% of rides by customer type
 plot<-ggplot(data=attendenceByExpected, aes(x=Expected, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
 ```
+This graph shows that if a person is not expected to show they almost never do. If they are expected there is still a chance that they don't show. Finally, if it is uncertain that the candidate will show there is about a 50/50 percent chance that they will attend the interview. 
 
 
 #Client
@@ -417,7 +442,6 @@ attendenceByClient <- interviews %>%
     summarise(count = n())
 
 
-#% of rides by customer type
 plot<-ggplot(data=attendenceByClient, aes(x=Client, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
@@ -431,8 +455,6 @@ attendenceByMarriage <- interviews %>%
     group_by(Marital_Status, Attendance) %>%
     summarise(count = n())
 
-
-#% of rides by customer type
 plot<-ggplot(data=attendenceByMarriage, aes(x=Marital_Status, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
@@ -461,8 +483,6 @@ attendenceByDOW <- interviews %>%
     group_by(DayOfWeek, Attendance) %>%
     summarise(count = n())
 
-
-#% of rides by customer type
 plot<-ggplot(data=attendenceByDOW, aes(x=DayOfWeek, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
@@ -538,7 +558,9 @@ CrossTable(i_test$Attendance, interview_cost_pred,
            prop.chisq = FALSE, prop.c = FALSE, prop.r = FALSE,
            dnn = c('actual attendance', 'predicted attendance'))
 ```
+We can see that the Decision Tree does a great job at predicting whether or not a person will show up to an interview or not. 
 
+Lets see if one of the other ML algorithms preforms as well.
 
 
 
