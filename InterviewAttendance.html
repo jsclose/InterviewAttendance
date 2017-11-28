@@ -486,7 +486,7 @@ for(i in 1:nrow(interviews)){
 ## C5.0.default(x = i_train[-20], y = i_train$Attendance, trials = 15)
 ## 
 ## 
-## C5.0 [Release 2.07 GPL Edition]      Mon Nov 27 20:53:00 2017
+## C5.0 [Release 2.07 GPL Edition]      Mon Nov 27 21:12:44 2017
 ## -------------------------------
 ## 
 ## Class specified by attribute `outcome'
@@ -665,6 +665,8 @@ CrossTable(i_test$Attendance, interview_cost_pred,
 ## ------------------|-----------|-----------|-----------|
 ## 
 ## </code></pre>
+<p>We can see that the Decision Tree does a great job at predicting whether or not a person will show up to an interview or not.</p>
+<p>Lets see if one of the other ML algorithms preforms as well.</p>
 </div>
 <div id="svm" class="section level1">
 <h1>SVM</h1>

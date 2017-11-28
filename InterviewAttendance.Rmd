@@ -564,7 +564,6 @@ Lets see if one of the other ML algorithms preforms as well.
 
 
 
-
 #SVM
 ```{r}
 #  Training a model on the data
