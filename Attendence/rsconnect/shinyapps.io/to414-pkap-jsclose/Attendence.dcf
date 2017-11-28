@@ -1,0 +1,12 @@
+name: Attendence
+title: Attendence
+username:
+account: to414-pkap-jsclose
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 241152
+bundleId: 1102027
+url: https://to414-pkap-jsclose.shinyapps.io/Attendence/
+when: 1511901145.67834
+asMultiple: FALSE
+asStatic: FALSE

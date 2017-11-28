@@ -142,6 +142,9 @@ attendenceByPosition <- interviews %>%
     group_by(Position, Attendance) %>%
     summarise(count = n())
 
+
+attendenceByPosition
+
 plot<-ggplot(data=attendenceByPosition, aes(x=Position, y=count, fill = (Attendance)))+
   geom_bar(stat="identity" , position = "dodge")
 plot 
@@ -610,8 +613,8 @@ library(class)
 att_pred <- knn(train = i_train, test = i_test, cl = i_train_labels, k = 35)
 
 CrossTable(x= i_test_labels, y = att_pred, prop.chisq = FALSE)
-```
 
+```
 
 
 
